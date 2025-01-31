@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 function Form() {
   // States for handling data
@@ -8,12 +9,28 @@ function Form() {
   const [sourceAmount, setSourceAmount] = useState(0);
   const [targetAmount, setTargetAmount] = useState(0);
 
+  const [currencyList, setCurrencyList] = useState({});
+
   // Handles Submit fn
   function handleSubmit(e) {
     e.preventDefault();
-    console.log(currDate, sourceCurr, sourceAmount);
-
+    console.log(`Date: ${currDate}`);
+    console.log(`Source Currency: ${sourceCurr}`);
+    console.log(`Target Currency: ${targetCurr}`);
+    console.log(`Source Amount: ${sourceAmount}`);
   }
+
+  useEffect(() => {
+    const getCurrencies = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/getAllCurrencies');
+        setCurrencyList(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    getCurrencies();
+  }, []);
 
   return (
     <div className="w-full max-w-lg mx-auto">
@@ -48,6 +65,9 @@ function Form() {
             name=""
             id="">
             <option value="">Select Source Currency</option>
+            {Object.entries(currencyList).map(([code, name]) => (
+              <option key={code} value={code}>{name} - {code}</option>
+            ))}
           </select>
         </div>
 
@@ -64,6 +84,9 @@ function Form() {
             name=""
             id="">
             <option value="">Select Target Currency</option>
+            {Object.entries(currencyList).map(([code, name]) => (
+              <option key={code} value={code}>{name} - {code}</option>
+            ))}
           </select>
         </div>
 
