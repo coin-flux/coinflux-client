@@ -8,16 +8,40 @@ function Form() {
   const [targetCurr, setTargetCurr] = useState("");
   const [sourceAmount, setSourceAmount] = useState(0);
   const [targetAmount, setTargetAmount] = useState(0);
-
   const [currencyList, setCurrencyList] = useState({});
 
+  const targetValueDisplay = (targetAmount === 0) ?
+    null
+    :
+    (<div className='text-center'>
+      <p><span className='text-3xl text-primary px-1'>{sourceAmount} {sourceCurr} </span>is Equal to <span className='text-3xl text-primary px-1'>{targetAmount} {targetCurr}</span></p>
+    </div>
+    )
+
   // Handles Submit fn
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     console.log(`Date: ${currDate}`);
     console.log(`Source Currency: ${sourceCurr}`);
     console.log(`Target Currency: ${targetCurr}`);
     console.log(`Source Amount: ${sourceAmount}`);
+
+    try {
+      const response = await axios.get('http://localhost:5000/convert', {
+        params: {
+          sourceCurrency: sourceCurr,
+          targetCurrency: targetCurr,
+          date: currDate,
+          sourceAmount: sourceAmount
+        }
+      });
+
+      setTargetAmount(response.data);
+
+    } catch (error) {
+      console.error(error);
+
+    }
   }
 
   useEffect(() => {
@@ -108,11 +132,9 @@ function Form() {
         </div>
 
         <button className="cursor-pointer my-10 focus:outline-none text-white  bg-button-primary hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-3 dark:hover:bg-button-primary dark:bg-green-700 dark:focus:ring-green-800">Get Target Currency</button>
-
+        {targetValueDisplay}
       </form>
     </div>
-
-
 
   )
 }
