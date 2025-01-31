@@ -7,24 +7,35 @@ function Form() {
   const [sourceCurr, setSourceCurr] = useState("");
   const [targetCurr, setTargetCurr] = useState("");
   const [sourceAmount, setSourceAmount] = useState(0);
+  const [inputAmount, setInputAmount] = useState(0);
   const [targetAmount, setTargetAmount] = useState(0);
   const [currencyList, setCurrencyList] = useState({});
+  const [isLoading, setLoadingStatus] = useState(false);
 
   const targetValueDisplay = (targetAmount === 0) ?
     null
     :
     (<div className='text-center'>
-      <p><span className='text-3xl text-primary px-1'>{sourceAmount} {sourceCurr} </span>is Equal to <span className='text-3xl text-primary px-1'>{targetAmount} {targetCurr}</span></p>
+      <p><span className='text-lg sm:text-3xl text-primary px-1'>{sourceAmount} {sourceCurr} </span>is Equal to <span className='text-lg sm:text-3xl text-primary px-1'>{targetAmount} {targetCurr}</span></p>
     </div>
     )
 
   // Handles Submit fn
   async function handleSubmit(e) {
     e.preventDefault();
+
+    // Validate fields before submission
+    if (!currDate || !sourceCurr || !targetCurr || !inputAmount) {
+      alert("Please fill all fields!");
+      return;
+    }
+
     console.log(`Date: ${currDate}`);
     console.log(`Source Currency: ${sourceCurr}`);
     console.log(`Target Currency: ${targetCurr}`);
-    console.log(`Source Amount: ${sourceAmount}`);
+    console.log(`Source Amount: ${inputAmount}`);
+
+    setLoadingStatus(true);
 
     try {
       const response = await axios.get('http://localhost:5000/convert', {
@@ -32,10 +43,13 @@ function Form() {
           sourceCurrency: sourceCurr,
           targetCurrency: targetCurr,
           date: currDate,
-          sourceAmount: sourceAmount
+          sourceAmount: inputAmount
         }
       });
 
+      setLoadingStatus(false);
+
+      setSourceAmount(inputAmount);
       setTargetAmount(response.data);
 
     } catch (error) {
@@ -122,7 +136,7 @@ function Form() {
             Enter Amount
           </label>
           <input
-            onChange={(e) => { setSourceAmount(e.target.value) }}
+            onChange={(e) => { setInputAmount(e.target.value) }}
             type="text"
             id="source-amount"
             className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500"
@@ -131,7 +145,7 @@ function Form() {
           />
         </div>
 
-        <button className="cursor-pointer my-10 focus:outline-none text-white  bg-button-primary hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-3 dark:hover:bg-button-primary dark:bg-green-700 dark:focus:ring-green-800">Get Target Currency</button>
+        <button className="cursor-pointer my-10 focus:outline-none text-white  bg-button-primary hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-3 dark:hover:bg-button-primary dark:bg-green-700 dark:focus:ring-green-800">{isLoading ? 'Converting. . . ' : 'Get Target Currency'}</button>
         {targetValueDisplay}
       </form>
     </div>
